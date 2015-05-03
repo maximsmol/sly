@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <csignal>
 #include <cassert>
 
 #include <SDL.h>
@@ -16,9 +17,17 @@ namespace sly
 		SDL_Renderer* renderer = nullptr;
 		SDL_Texture*  buffer   = nullptr;
 
+		bool inited = false;
+
+		void handleSignal(int signal);
+
 		void init(const char* winName, int w, int h)
 		{
 			assert(SDL_Init(SDL_INIT_EVERYTHING) == 0);
+			assert(
+				IMG_Init(IMG_INIT_PNG) ==
+				(IMG_INIT_PNG)
+			);
 
 			window =
 				SDL_CreateWindow(
@@ -74,8 +83,46 @@ namespace sly
 
 
 			assert(SDL_SetRenderTarget(renderer, buffer) == 0);
+			assert(SDL_RenderClear(renderer) == 0);
 
 			atexit(quit);
+
+			signal(SIGABRT, handleSignal);
+			signal(SIGILL , handleSignal);
+
+			#if !defined(NDEBUG)
+				printf("Initializing SLY v%d.%d.%d\n",
+					SLY_MAJOR_VERSION, SLY_MINOR_VERSION, SLY_PATCHLEVEL
+				);
+				printf("SLD2 v%d.%d.%d\n",
+					SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL
+				);
+				printf("SLD2_image v%d.%d.%d\n",
+					SDL_IMAGE_MAJOR_VERSION,
+					SDL_IMAGE_MINOR_VERSION,
+					SDL_IMAGE_PATCHLEVEL
+				);
+				printf("SLD2_ttf v%d.%d.%d\n",
+					TTF_MAJOR_VERSION, TTF_MINOR_VERSION, TTF_PATCHLEVEL
+				);
+				printf("SLD2_mixer v%d.%d.%d\n",
+					MIX_MAJOR_VERSION, MIX_MINOR_VERSION, MIX_PATCHLEVEL
+				);
+			#endif
+
+			inited = true;
+		}
+
+		void render()
+		{
+			assert(SDL_SetRenderTarget(renderer, nullptr) == 0);
+
+			// Wiki says to call it even if overwriting every pixel
+			assert(SDL_RenderClear(renderer) == 0);
+			assert(SDL_RenderCopy(renderer, buffer, nullptr, nullptr) == 0);
+			SDL_RenderPresent(renderer);
+
+			assert(SDL_SetRenderTarget(renderer, buffer) == 0);
 		}
 
 		void quit()
@@ -83,7 +130,19 @@ namespace sly
 			SDL_DestroyTexture(buffer);
 			SDL_DestroyRenderer(renderer);
 			SDL_DestroyWindow(window);
+			IMG_Quit();
 			SDL_Quit();
+
+			inited = false;
+		}
+
+		void handleSignal(int)
+		{
+			printf("SDL2      : %s\n", SDL_GetError());
+			printf("SDL2_TTF  : %s\n", TTF_GetError());
+			printf("SDL2_image: %s\n", IMG_GetError());
+			printf("SDL2_mixer: %s\n", Mix_GetError());
+			quit();
 		}
 	}
 }

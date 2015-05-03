@@ -1,6 +1,6 @@
 env = Environment(CXX = 'clang++')
 
-env.Append(CXXFLAGS = '--std=c++11 -stdlib=libc++')
+env.Append(CXXFLAGS = '--std=c++14 -stdlib=libc++')
 env.Append(LINKFLAGS = '--stdlib=libc++')
 
 env.Append(CXXFLAGS = '-Weverything')
