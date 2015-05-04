@@ -67,8 +67,10 @@ namespace sly
 			return data_ != nullptr &&
 				   dimensions_.w >= 0 && dimensions_.h >= 0 &&
 				   dimensions_.x >= 0 && dimensions_.y >= 0 &&
-				   ((flip_ & (~SDL_FLIP_HORIZONTAL)) &
-				   	(~SDL_FLIP_VERTICAL)) == 0;
+				   (
+				   		(flip_ & (~SDL_FLIP_HORIZONTAL)) &
+				   		(~SDL_FLIP_VERTICAL)
+				   ) == 0;
 		}
 
 
@@ -78,7 +80,6 @@ namespace sly
 		)
 		{
 			assert(ok());
-			puts("A");
 			if (flipped)
 				setFlip(
 					getFlip() |

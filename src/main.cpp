@@ -13,9 +13,9 @@ constexpr double floatDelta = 0.000000000000001;
 constexpr double walkingSpeed = 0.3;
 constexpr double jumpSpeed = 1;
 
-constexpr double gravitation = jumpSpeed/300;
+constexpr double gravitation = jumpSpeed/(FPS*10);
 
-constexpr double floorSlipperiness = 30;
+constexpr double floorSlipperiness = FPS;
 constexpr double floorFriction = walkingSpeed/(floorSlipperiness+1);
 
 
@@ -28,7 +28,11 @@ int main()
 	sly::base::init("SLY Test app", 800, 600);
 
 	sly::image::Image img("../res/mario.png");
+	sly::image::Image deadImg("../res/dead.png");
 	sly::sound::SoundEffect jump("../res/jump.wav", 0);
+	sly::sound::Music theme("../res/overworld.ogg");
+	sly::sound::Music died("../res/died.ogg");
+	theme.play(-1);
 
 	double playerX = 0;
 	double playerY = 0;
@@ -38,7 +42,9 @@ int main()
 	double maxXVelocity = walkingSpeed+floorSlipperiness;
 
 	SDL_Event event;
+	int skipPhysTicks = 0;
 	bool running = true;
+	bool dead = false;
 	bool moveKeys[4] = {};
 	while (running)
 	{
@@ -73,55 +79,95 @@ int main()
 			}
 		}
 
-		if (moveKeys[0])
+		if (skipPhysTicks > 0) skipPhysTicks--;
+		if (skipPhysTicks == 0)
 		{
-			playerVelocityX -= walkingSpeed;
-			if (playerVelocityX < -maxXVelocity)
-				playerVelocityX = -maxXVelocity;
-		}
-		if (moveKeys[1] && isDoubleZero(playerY))
-		{
-			playerVelocityY = jumpSpeed;
-			if (jump.isChannelAvailable()) jump.play();
-		}
-		if (moveKeys[2])
-		{
-			playerVelocityX += walkingSpeed;
-			if (playerVelocityX > maxXVelocity)
-				playerVelocityX = maxXVelocity;
-		}
-
-		playerX += playerVelocityX*deltaT;
-		playerY += playerVelocityY*deltaT;
-		if (playerY < floatDelta) playerY = 0;
-
-		if (!isDoubleZero(playerVelocityX))
-		{
-			if (playerVelocityX > floatDelta)
+			if (moveKeys[0])
 			{
-				playerVelocityX -= floorFriction*deltaT;
-				if (playerVelocityX < -floatDelta) playerVelocityX = 0;
+				playerVelocityX -= walkingSpeed;
+				if (playerVelocityX < -maxXVelocity)
+					playerVelocityX = -maxXVelocity;
 			}
-			else
+			if (moveKeys[1] && isDoubleZero(playerY))
 			{
-				playerVelocityX += floorFriction*deltaT;
-				if (playerVelocityX > floatDelta) playerVelocityX = 0;
+				playerVelocityY = jumpSpeed;
+				if (jump.isChannelAvailable()) jump.play();
+			}
+			if (moveKeys[2])
+			{
+				playerVelocityX += walkingSpeed;
+				if (playerVelocityX > maxXVelocity)
+					playerVelocityX = maxXVelocity;
 			}
 
-		}
+			playerX += playerVelocityX*deltaT;
+			playerY += playerVelocityY*deltaT;
+			if (!dead && playerY < floatDelta) playerY = 0;
 
-		if (playerY > floatDelta) playerVelocityY -= gravitation*deltaT;
-		else playerVelocityY = 0;
+			if (!isDoubleZero(playerVelocityX))
+			{
+				if (playerVelocityX > floatDelta)
+				{
+					playerVelocityX -= floorFriction*deltaT;
+					if (playerVelocityX < -floatDelta) playerVelocityX = 0;
+				}
+				else
+				{
+					playerVelocityX += floorFriction*deltaT;
+					if (playerVelocityX > floatDelta) playerVelocityX = 0;
+				}
+
+			}
+
+			if (dead || playerY > floatDelta)
+				playerVelocityY -= gravitation*deltaT;
+			else playerVelocityY = 0;
+
+			if (!dead && (playerX > 352 || playerX < -400 || playerY > 300))
+			{
+				Mix_HaltMusic();
+				died.play();
+				dead = true;
+				skipPhysTicks = 18;
+
+				playerVelocityX = 0;
+				playerVelocityY = jumpSpeed/2;
+
+				if (playerX < -400) playerX = -400;
+				if (playerX > 352) playerX = 352;
+				if (playerY > 300) playerY = 300;
+			}
+
+			if (playerY > 300) playerY = 300;
+			if (dead && playerY < -300)
+			{
+				running = false;
+				playerY = -300;
+			}
+		}
 
 
 		SDL_RenderClear(sly::base::renderer);
 
-		img.render(scastInt(playerX)+400, 300-scastInt(playerY), 48, 64);
+		if (!dead)
+			img.render(scastInt(playerX)+400, 300-scastInt(playerY), 48, 64);
+		else deadImg.render(scastInt(playerX)+400, 300-scastInt(playerY), 64, 62);
 
 		sly::base::render();
 
 
 		SDL_Delay(1000/FPS);
+	}
+
+	running = dead;
+	while (running && Mix_PlayingMusic() == 1)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT) running = false;
+			else if (event.type == SDL_KEYDOWN &&
+					 event.key.keysym.sym == SDLK_ESCAPE) running = false;
+		}
 	}
 
 	return 0;

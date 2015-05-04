@@ -124,15 +124,43 @@ namespace sly
 				) const;
 
 				//
-				// Channel getters and setters
+				// Getters and setters
 				/*inline*/ void setChannel(int selectedChannel);
 				/*inline*/ int getChannel() const;
+
+				/*inline*/ void setData(Mix_Chunk* data);
+				/*inline*/ Mix_Chunk* getData() const;
 
 			private:
 				/*inline*/ bool ok() const;
 
 				int selectedChannel_;
 				Mix_Chunk* data_;
+		};
+
+		class Music
+		{
+			public:
+				Music(const char* path);
+				Music(const std::string& path);
+				~Music();
+
+				/*inline*/ Mix_MusicType getType() const;
+
+				/*inline*/ void play(int loops = 0) const;
+				/*inline*/ void fadein(int ms = 0, int loops = 0) const;
+				/*inline*/ void fadeinFrom(
+					double pos = 0,
+					int ms = 0,
+					int loops = 0
+				) const;
+
+				/*inline*/ void setData(Mix_Music* data);
+				/*inline*/ Mix_Music* getData() const;
+
+			private:
+				/*inline*/ bool ok() const;
+				Mix_Music* data_;
 		};
 	}
 }

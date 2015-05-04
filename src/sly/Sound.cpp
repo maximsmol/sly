@@ -25,12 +25,13 @@ namespace sly
 
 		SoundEffect::~SoundEffect()
 		{
-			Mix_FreeChunk(data_);
+			Mix_FreeChunk(getData());
 		}
 
 		/*inline*/ bool SoundEffect::ok() const
 		{
-			return data_ != nullptr;
+			return data_ != nullptr &&
+				   (selectedChannel_ >= 0 || selectedChannel_ == -1);
 		}
 
 
@@ -128,11 +129,11 @@ namespace sly
 				channel = getChannel();
 
 			#if !defined(NDEBUG)
-				int res = Mix_PlayChannel(channel, data_, loops);
+				int res = Mix_PlayChannel(channel, getData(), loops);
 				assert(res != -1);
 				return res;
 			#else
-				return Mix_PlayChannel(channel, data_, loops);
+				return Mix_PlayChannel(channel, getData(), loops);
 			#endif
 		}
 
@@ -153,11 +154,11 @@ namespace sly
 				channel = getChannel();
 
 			#if !defined(NDEBUG)
-				int res = Mix_PlayChannelTimed(channel, data_, loops, ticks);
+				int res = Mix_PlayChannelTimed(channel, getData(), loops, ticks);
 				assert(res != -1);
 				return res;
 			#else
-				return Mix_PlayChannelTimed(channel, data_, loops, ticks);
+				return Mix_PlayChannelTimed(channel, getData(), loops, ticks);
 			#endif
 		}
 
@@ -182,11 +183,11 @@ namespace sly
 				channel = getChannel();
 
 			#if !defined(NDEBUG)
-				int res = Mix_FadeInChannel(channel, data_, loops, ms);
+				int res = Mix_FadeInChannel(channel, getData(), loops, ms);
 				assert(res != -1);
 				return res;
 			#else
-				return Mix_FadeInChannel(channel, data_, loops, ms);
+				return Mix_FadeInChannel(channel, getData(), loops, ms);
 			#endif
 		}
 
@@ -209,17 +210,17 @@ namespace sly
 
 			#if !defined(NDEBUG)
 				int res =
-					Mix_FadeInChannelTimed(channel, data_, loops, ms, ticks);
+					Mix_FadeInChannelTimed(channel, getData(), loops, ms, ticks);
 				assert(res != -1);
 				return res;
 			#else
-				return Mix_FadeInChannelTimed(channel, data_, loops, ms, ticks);
+				return Mix_FadeInChannelTimed(channel, getData(), loops, ms, ticks);
 			#endif
 		}
 
 
 		//
-		// Channel getter and setter
+		// Getters and setters
 		//
 
 		/*inline*/ void SoundEffect::setChannel(int selectedChannel)
@@ -236,6 +237,19 @@ namespace sly
 		{
 			assert(ok());
 			return selectedChannel_;
+		}
+
+		/*inline*/ void SoundEffect::setData(Mix_Chunk* data)
+		{
+			assert(ok());
+			data_ = data;
+			assert(ok());
+		}
+
+		/*inline*/ Mix_Chunk* SoundEffect::getData() const
+		{
+			assert(ok());
+			return data_;
 		}
 	}
 }

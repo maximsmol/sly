@@ -24,14 +24,8 @@ namespace sly
 		void init(const char* winName, int w, int h)
 		{
 			sly_assertEqual(SDL_Init(SDL_INIT_EVERYTHING), 0);
-			sly_assertEqual(
-				IMG_Init(IMG_INIT_PNG),
-				(IMG_INIT_PNG)
-			);
-			sly_assertEqual(
-				Mix_Init(MIX_INIT_OGG),
-				(MIX_INIT_OGG)
-			);
+			IMG_Init(IMG_INIT_PNG);
+			Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
 
 			#if !defined(SLY_NOPEN_AUDIO)
 				sly_assertEqual(
