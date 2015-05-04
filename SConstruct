@@ -5,6 +5,7 @@ env.Append(LINKFLAGS = '--stdlib=libc++')
 
 env.Append(CXXFLAGS = '-Weverything')
 env.Append(CXXFLAGS = '-Wno-c++98-compat')
+env.Append(CXXFLAGS = '-Wno-padded')
 
 
 SDL_LIBS = ['SDL2', 'SDL2_image', 'SDL2_ttf', 'SDL2_mixer']

@@ -45,8 +45,8 @@ namespace sly
 		class Image
 		{
 			public:
-				Image(const char* path, SDL_Rect* sourceRect = nullptr);
 				Image(const std::string& path, SDL_Rect* sourceRect = nullptr);
+				Image(const char* path, SDL_Rect* sourceRect = nullptr);
 				~Image();
 
 				/*inline*/ void flip(bool flipped = true, bool vertical = false);
@@ -78,6 +78,93 @@ namespace sly
 				SDL_Rect dimensions_;
 				SDL_RendererFlip flip_;
 		};
+
+		class SpriteSheet
+		{
+			public:
+				SpriteSheet(const std::string& path,
+					  		int w = 32, int h = 32,
+					  		int x = 0, int y = 0);
+				SpriteSheet(const char* path,
+					 		int w = 32, int h = 32,
+							int x = 0, int y = 0);
+				SpriteSheet(Image* img,
+					 		int w = 32, int h = 32,
+							int x = 0, int y = 0);
+				~SpriteSheet();
+
+				void render(int x = 0, int y = 0,
+							int spriteX = 0, int spriteY = 0,
+							int w = -1, int h = -1) const;
+
+				/*inline*/ void setData(Image* data);
+				/*inline*/ Image* getData() const;
+
+				/*inline*/ void setX(int x);
+				/*inline*/ int getX() const;
+
+				/*inline*/ void setY(int y);
+				/*inline*/ int getY() const;
+
+				/*inline*/ void setW(int w);
+				/*inline*/ int getW() const;
+
+				/*inline*/ void setH(int h);
+				/*inline*/ int getH() const;
+
+			private:
+				/*inline*/ bool ok() const;
+
+				Image* data_;
+				int x_, y_, w_, h_;
+		};
+
+		class Animation
+		{
+			public:
+				Animation(const std::string& path,
+						  int rowLength = -1,
+						  int length = 0,
+					 	  int w = 32, int h = 32,
+						  int x = 0, int y = 0);
+				Animation(const char* path,
+						  int rowLength = -1,
+						  int length = 0,
+					 	  int w = 32, int h = 32,
+						  int x = 0, int y = 0);
+				Animation(Image* img,
+						  int rowLength = -1,
+						  int length = 0,
+					 	  int w = 32, int h = 32,
+						  int x = 0, int y = 0);
+				Animation(const SpriteSheet* sheet,
+						  int rowLength = -1, int length = 0);
+				~Animation();
+
+				void render(int x = 0, int y = 0,
+							int w = -1, int h = -1) const;
+
+				void setFrame(int frame);
+				void nextFrame();
+				int getFrame() const;
+
+				void setRowLength(int length);
+				int getRowLength() const;
+
+				void setData(const SpriteSheet* data);
+				const SpriteSheet* getData() const;
+
+				void setLength(int len);
+				int getLength() const;
+
+			private:
+				/*inline*/ bool ok() const;
+
+				const SpriteSheet* data_;
+				int rowLength_;
+				int lastFrame_;
+				int length_;
+		};
 	}
 
 	namespace sound
@@ -85,8 +172,8 @@ namespace sly
 		class SoundEffect
 		{
 			public:
-				SoundEffect(const char* path, int selectedChannel = -1);
 				SoundEffect(const std::string& path, int selectedChannel = -1);
+				SoundEffect(const char* path, int selectedChannel = -1);
 				~SoundEffect();
 
 				//
@@ -141,8 +228,8 @@ namespace sly
 		class Music
 		{
 			public:
-				Music(const char* path);
 				Music(const std::string& path);
+				Music(const char* path);
 				~Music();
 
 				/*inline*/ Mix_MusicType getType() const;

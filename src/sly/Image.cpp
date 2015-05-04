@@ -10,7 +10,8 @@ namespace sly
 {
 	namespace image
 	{
-		Image::Image(const std::string& path, SDL_Rect* sourceRect/* = nullptr*/) :
+		Image::Image(const std::string& path,
+					 SDL_Rect* sourceRect/* = nullptr*/) :
 			Image(path.c_str(), sourceRect) {}
 		Image::Image(const char* path, SDL_Rect* sourceRect/* = nullptr*/) :
 			data_(nullptr),
@@ -60,9 +61,10 @@ namespace sly
 		Image::~Image()
 		{
 			SDL_DestroyTexture(data_);
+			data_ = nullptr;
 		}
 
-		inline bool Image::ok() const
+		/*inline*/ bool Image::ok() const
 		{
 			return data_ != nullptr &&
 				   dimensions_.w >= 0 && dimensions_.h >= 0 &&
@@ -126,7 +128,7 @@ namespace sly
 			assert(w >= 0 || w == -1);
 			assert(h >= 0 || h == -1);
 
-			SDL_Rect rect = {};
+			SDL_Rect rect({});
 			rect.x = x;
 			rect.y = y;
 			rect.w = (w == -1 ? dimensions_.w : w);
@@ -156,13 +158,13 @@ namespace sly
 		}
 
 
-		inline SDL_Rect Image::getSourceRect() const
+		/*inline*/ SDL_Rect Image::getSourceRect() const
 		{
 			assert(ok());
 			return dimensions_;
 		}
 
-		inline void Image::setSourceRect(SDL_Rect src)
+		/*inline*/ void Image::setSourceRect(SDL_Rect src)
 		{
 			assert(ok());
 			assert(src.w >= 0 && src.h >= 0 &&
@@ -173,13 +175,13 @@ namespace sly
 		}
 
 
-		inline SDL_Texture* Image::getTexture() const
+		/*inline*/ SDL_Texture* Image::getTexture() const
 		{
 			assert(ok());
 			return data_;
 		}
 
-		inline void Image::setTexture(SDL_Texture* texture)
+		/*inline*/ void Image::setTexture(SDL_Texture* texture)
 		{
 			assert(ok());
 			assert(texture != nullptr);
