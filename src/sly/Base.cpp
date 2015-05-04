@@ -23,11 +23,23 @@ namespace sly
 
 		void init(const char* winName, int w, int h)
 		{
-			assert(SDL_Init(SDL_INIT_EVERYTHING) == 0);
-			assert(
-				IMG_Init(IMG_INIT_PNG) ==
+			sly_assertEqual(SDL_Init(SDL_INIT_EVERYTHING), 0);
+			sly_assertEqual(
+				IMG_Init(IMG_INIT_PNG),
 				(IMG_INIT_PNG)
 			);
+			sly_assertEqual(
+				Mix_Init(MIX_INIT_OGG),
+				(MIX_INIT_OGG)
+			);
+
+			#if !defined(SLY_NOPEN_AUDIO)
+				sly_assertEqual(
+					Mix_OpenAudio(22050,
+					MIX_DEFAULT_FORMAT,
+					2, 2048), 0
+				);
+			#endif
 
 			window =
 				SDL_CreateWindow(
@@ -82,8 +94,8 @@ namespace sly
 			assert(buffer != nullptr);
 
 
-			assert(SDL_SetRenderTarget(renderer, buffer) == 0);
-			assert(SDL_RenderClear(renderer) == 0);
+			sly_assertEqual(SDL_SetRenderTarget(renderer, buffer), 0);
+			sly_assertEqual(SDL_RenderClear(renderer), 0);
 
 			atexit(quit);
 
@@ -115,14 +127,16 @@ namespace sly
 
 		void render()
 		{
-			assert(SDL_SetRenderTarget(renderer, nullptr) == 0);
+			sly_assertEqual(SDL_SetRenderTarget(renderer, nullptr), 0);
 
 			// Wiki says to call it even if overwriting every pixel
-			assert(SDL_RenderClear(renderer) == 0);
-			assert(SDL_RenderCopy(renderer, buffer, nullptr, nullptr) == 0);
+			sly_assertEqual(SDL_RenderClear(renderer), 0);
+			sly_assertEqual(
+				SDL_RenderCopy(renderer, buffer, nullptr, nullptr), 0
+			);
 			SDL_RenderPresent(renderer);
 
-			assert(SDL_SetRenderTarget(renderer, buffer) == 0);
+			sly_assertEqual(SDL_SetRenderTarget(renderer, buffer), 0);
 		}
 
 		void quit()
@@ -130,6 +144,12 @@ namespace sly
 			SDL_DestroyTexture(buffer);
 			SDL_DestroyRenderer(renderer);
 			SDL_DestroyWindow(window);
+
+			#if !defined(SLY_NOPEN_AUDIO)
+				Mix_CloseAudio();
+			#endif
+
+			Mix_Quit();
 			IMG_Quit();
 			SDL_Quit();
 
