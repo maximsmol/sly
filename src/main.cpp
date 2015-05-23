@@ -7,21 +7,21 @@
 #include "SLY.hpp"
 
 const int FPS = 30;
-constexpr double deltaT = 1000/FPS;
 constexpr double floatDelta = 0.000000000000001;
 
-constexpr double walkingSpeed = 0.3;
-constexpr double jumpSpeed = 1;
+constexpr double walkingSpeed = 0.5;
+constexpr double jumpSpeed = 10;
 
-constexpr double gravitation = jumpSpeed/(FPS*10);
+constexpr double gravitation = jumpSpeed/35;
 
-constexpr double floorSlipperiness = FPS;
+constexpr double floorSlipperiness = 3;
 constexpr double floorFriction = walkingSpeed/(floorSlipperiness+1);
 
 
 #define isDoubleZero(val) \
 	((0 <= (val) && (val) <= floatDelta) || (floatDelta <= (val) && (val) <= 0))
 #define scastInt(val) static_cast<int>(val)
+#define areFloatsEqual(a, b) ((-floatDelta < (a)-(b))&&((a)-(b) < floatDelta))
 
 int main()
 {
@@ -29,21 +29,21 @@ int main()
 
 	SDL_Rect rect({});
 
-	sly::image::Image img("../res/SMB.png");
+	sly::image::Image img("../res/mario.png");
 	rect.x = 0;
 	rect.y = 32;
 	rect.w = 16;
 	rect.h = 16;
 	img.setSourceRect(rect);
 
-	sly::image::Image deadImg("../res/SMB.png");
+	sly::image::Image deadImg("../res/mario.png");
 	rect.x = 96;
 	rect.y = 32;
 	rect.w = 16;
 	rect.h = 16;
 	deadImg.setSourceRect(rect);
 
-	sly::image::Image marioSpritesheet("../res/SMB.png");
+	sly::image::Image marioSpritesheet("../res/mario.png");
 	sly::image::Animation mario(&marioSpritesheet, 6, 3, 16, 16, 16, 32);
 
 	sly::image::Animation sMario(&marioSpritesheet, 6, 3, 16, 32, 16, 0);
@@ -64,12 +64,16 @@ int main()
 
 	SDL_Event event;
 	int skipPhysTicks = 0;
-	int animationTicks = 0;
 	bool running = true;
 	bool dead = false;
 	bool moveKeys[4] = {};
+	unsigned int lastTime = 0;
+	unsigned int animationTime = 0;
+	unsigned int fps = FPS;
+	double deltaT = FPS/1000.0;
 	while (running)
 	{
+		lastTime = SDL_GetTicks();
 		while (SDL_PollEvent(&event))
 		{
 			if (event.type == SDL_QUIT) running = false;
@@ -81,7 +85,6 @@ int main()
 					if (!moveKeys[0] && key == SDLK_a)
 					{
 						marioSpritesheet.setHorizontalFlip(true);
-						playerSprite->setFrame(3);
 						moveKeys[0] = true;
 					}
 					else if (!moveKeys[1] && key == SDLK_SPACE)
@@ -89,7 +92,6 @@ int main()
 					else if (!moveKeys[2] && key == SDLK_d)
 					{
 						marioSpritesheet.setHorizontalFlip(false);
-						playerSprite->setFrame(3);
 						moveKeys[2] = true;
 					}
 					else if (!moveKeys[3] && key == SDLK_s) moveKeys[3] = true;
@@ -127,24 +129,40 @@ int main()
 			{
 				if (moveKeys[0])
 				{
-					if (animationTicks % (FPS/6) == 0)
+					if (playerVelocityX > 0)
+					{
+						playerSprite->setFrame(3);
+						animationTime = 0;
+					}
+					else if (animationTime > 100)
+					{
 						playerSprite->nextFrame();
+						animationTime = 0;
+					}
 
-					playerVelocityX -= walkingSpeed;
+					playerVelocityX -= walkingSpeed*deltaT;
 					if (playerVelocityX < -maxXVelocity)
 						playerVelocityX = -maxXVelocity;
 				}
-				if (moveKeys[1] && (playerY == playerH))
+				if (moveKeys[1] && areFloatsEqual(playerH, playerY))
 				{
 					playerVelocityY = jumpSpeed;
 					if (jump.isChannelAvailable()) jump.play();
 				}
 				if (moveKeys[2])
 				{
-					if (animationTicks % (FPS/6) == 0)
+					if (playerVelocityX < 0)
+					{
+						playerSprite->setFrame(3);
+						animationTime = 0;
+					}
+					else if (animationTime > 100)
+					{
 						playerSprite->nextFrame();
+						animationTime = 0;
+					}
 
-					playerVelocityX += walkingSpeed;
+					playerVelocityX += walkingSpeed*deltaT;
 					if (playerVelocityX > maxXVelocity)
 						playerVelocityX = maxXVelocity;
 				}
@@ -221,7 +239,11 @@ int main()
 		sly::base::render();
 
 		SDL_Delay(1000/FPS);
-		animationTicks++;
+
+		unsigned int timePassed = SDL_GetTicks()-lastTime;
+		fps = 1000/timePassed;
+		animationTime += timePassed;
+		deltaT = 100.0/fps;
 	}
 
 	running = dead;

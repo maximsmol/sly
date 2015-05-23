@@ -10,6 +10,26 @@ namespace sly
 {
 	namespace image
 	{
+		inline SDL_Rect getSourceRect(SDL_Rect* argRect, SDL_Texture* texture)
+		{
+			assert(texture != nullptr);
+			if (argRect != nullptr)
+				return *argRect;
+
+			int width  = 0;
+			int height = 0;
+
+			sly_assertEqual(
+				SDL_QueryTexture(
+					texture,
+					nullptr, nullptr,
+					&width, &height
+				), 0
+			);
+
+			return {0, 0, width, height};
+		}
+
 		Image::Image(const std::string& path,
 					 SDL_Rect* sourceRect/* = nullptr*/) :
 			Image(path.c_str(), sourceRect) {}
@@ -32,28 +52,22 @@ namespace sly
 
 			//
 			// Store the dimensions for quick sourceRect building
-			if (sourceRect != nullptr)
-			{
-				dimensions_ = *sourceRect;
-			}
-			else
-			{
-				int width_  = 0;
-				int height_ = 0;
+			dimensions_ = sly::image::getSourceRect(sourceRect, getData());
 
-				sly_assertEqual(
-					SDL_QueryTexture(
-						data_,
-						nullptr, nullptr,
-						&width_, &height_
-					), 0
-				);
+			assert(ok());
+		}
 
-				dimensions_.x = 0;
-				dimensions_.y = 0;
-				dimensions_.w = width_;
-				dimensions_.h = height_;
-			}
+		Image::Image(SDL_Texture* data, SDL_Rect* sourceRect/* = nullptr*/) :
+			data_(data),
+			dimensions_(),
+			flip_(SDL_FLIP_NONE)
+		{
+			assert(sly::base::inited);
+			assert(ok());
+
+			//
+			// Store the dimensions for quick sourceRect building
+			dimensions_ = sly::image::getSourceRect(sourceRect, getData());
 
 			assert(ok());
 		}
@@ -123,8 +137,6 @@ namespace sly
 		) const
 		{
 			assert(ok());
-			assert(x >= 0);
-			assert(y >= 0);
 			assert(w >= 0 || w == -1);
 			assert(h >= 0 || h == -1);
 
@@ -138,7 +150,7 @@ namespace sly
 				sly_assertEqual(
 					SDL_RenderCopy(
 						sly::base::renderer,
-						getTexture(),
+						getData(),
 						&dimensions_,
 						&rect
 					), 0
@@ -148,7 +160,7 @@ namespace sly
 				sly_assertEqual(
 					SDL_RenderCopyEx(
 						sly::base::renderer,
-						getTexture(),
+						getData(),
 						&dimensions_,
 						&rect,
 						0, nullptr, getFlip()
@@ -175,13 +187,13 @@ namespace sly
 		}
 
 
-		/*inline*/ SDL_Texture* Image::getTexture() const
+		/*inline*/ SDL_Texture* Image::getData() const
 		{
 			assert(ok());
 			return data_;
 		}
 
-		/*inline*/ void Image::setTexture(SDL_Texture* texture)
+		/*inline*/ void Image::setData(SDL_Texture* texture)
 		{
 			assert(ok());
 			assert(texture != nullptr);

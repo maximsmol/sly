@@ -31,6 +31,13 @@ namespace sly
 			 	             int w/* = 32*/, int h/* = 32*/,
 				             int x/* = 0*/, int y/* = 0*/) :
 			Animation(new SpriteSheet(img, w, h, x, y), rowLength, length) {}
+		Animation::Animation(SDL_Texture* texture,
+							 int rowLength/* = -1*/,
+							 int length/* = 0*/,
+			 	             int w/* = 32*/, int h/* = 32*/,
+				             int x/* = 0*/, int y/* = 0*/) :
+			Animation(new SpriteSheet(texture, w, h, x, y), rowLength, length)
+		{}
 		Animation::Animation(const SpriteSheet* sheet,
 							 int rowLength/* = -1*/, int length/* = 0*/) :
 			data_(sheet),
@@ -40,9 +47,6 @@ namespace sly
 		{
 			assert(ok());
 		}
-
-		Animation::~Animation()
-		{}
 
 		/*inline*/ bool Animation::ok() const
 		{

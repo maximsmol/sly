@@ -14,6 +14,7 @@ namespace sly
 		Music::Music(const char* path) :
 			data_(Mix_LoadMUS(path))
 		{
+			assert(sly::base::inited);
 			assert(ok());
 		}
 

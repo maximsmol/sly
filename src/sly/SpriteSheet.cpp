@@ -20,6 +20,10 @@ namespace sly
 			 		int w/* = 32*/, int h/* = 32*/,
 					int x/* = 0*/, int y/* = 0*/) :
 			SpriteSheet(new Image(path), w, h, x, y) {}
+		SpriteSheet::SpriteSheet(SDL_Texture* texture,
+			 		int w/* = 32*/, int h/* = 32*/,
+					int x/* = 0*/, int y/* = 0*/) :
+			SpriteSheet(new Image(texture), w, h, x, y) {}
 		SpriteSheet::SpriteSheet(Image* img,
 			 		int w/* = 32*/, int h/* = 32*/,
 					int x/* = 0*/, int y/* = 0*/) :
@@ -30,11 +34,9 @@ namespace sly
 			w_(w),
 			h_(h)
 		{
+			assert(sly::base::inited);
 			assert(ok());
 		}
-
-		SpriteSheet::~SpriteSheet()
-		{}
 
 		/*inline*/ bool SpriteSheet::ok() const
 		{

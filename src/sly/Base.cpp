@@ -26,6 +26,7 @@ namespace sly
 			sly_assertEqual(SDL_Init(SDL_INIT_EVERYTHING), 0);
 			IMG_Init(IMG_INIT_PNG);
 			Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
+			sly_assertEqual(TTF_Init(), 0);
 
 			#if !defined(SLY_NOPEN_AUDIO)
 				sly_assertEqual(
@@ -143,6 +144,7 @@ namespace sly
 				Mix_CloseAudio();
 			#endif
 
+			TTF_Quit();
 			Mix_Quit();
 			IMG_Quit();
 			SDL_Quit();

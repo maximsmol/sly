@@ -2,7 +2,7 @@
 #define h_guard_maximsmol_sly_base
 
 #define SLY_MAJOR_VERSION 0
-#define SLY_MINOR_VERSION 0
+#define SLY_MINOR_VERSION 1
 #define SLY_PATCHLEVEL    0
 
 /*
@@ -21,8 +21,10 @@
 #endif
 
 #include <string>
+#include <cstdint>
 
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <SDL_mixer.h>
 
 namespace sly
@@ -40,6 +42,148 @@ namespace sly
 		void quit();
 	}
 
+	namespace text
+	{
+		struct GlyphMetrics
+		{
+			public:
+				int minX, maxX;
+				int minY, maxY;
+				int advance;
+		};
+
+		void setByteOrderSwapped(bool swapped = true);
+
+		class Font
+		{
+			public:
+				Font(const std::string& path, int size = 16, int face = 0);
+				Font(const char* path, int size = 16, int face = 0);
+				~Font();
+
+				#define __FGCOLOR {255, 255, 255, 255}
+				SDL_Texture* getTexure(const std::string& text,
+									   SDL_Color color = __FGCOLOR) const;
+				SDL_Texture* getTexure(const char* text,
+									   SDL_Color color = __FGCOLOR) const;
+				SDL_Texture* getTexure(const Uint16* text,
+									   SDL_Color color = __FGCOLOR) const;
+				SDL_Texture* getTexure(char ch,
+									   SDL_Color color = __FGCOLOR) const;
+				SDL_Texture* getTexure(Uint16 ch,
+									   SDL_Color color = __FGCOLOR) const;
+
+				#define __BGCOLOR {0, 0, 0, 255}
+				SDL_Texture* getShadedTexure(
+					const std::string& text,
+					SDL_Color color = __FGCOLOR,
+					SDL_Color bgcolor =__BGCOLOR) const;
+				SDL_Texture* getShadedTexure(
+					const char* text,
+					SDL_Color color = __FGCOLOR,
+					SDL_Color bgcolor = __BGCOLOR) const;
+				SDL_Texture* getShadedTexure(
+					const Uint16* text,
+					SDL_Color color = __FGCOLOR,
+					SDL_Color bgcolor = __BGCOLOR) const;
+				SDL_Texture* getShadedTexure(
+					char ch,
+					SDL_Color color = __FGCOLOR,
+					SDL_Color bgcolor = __BGCOLOR) const;
+				SDL_Texture* getShadedTexure(
+					Uint16 ch,
+					SDL_Color color = __FGCOLOR,
+					SDL_Color bgcolor = __BGCOLOR) const;
+				#undef __BGCOLOR
+
+				SDL_Texture* getBlendedTexure(
+					const std::string& text,
+					SDL_Color color = __FGCOLOR) const;
+				SDL_Texture* getBlendedTexure(
+					const char* text,
+					SDL_Color color = __FGCOLOR) const;
+				SDL_Texture* getBlendedTexure(
+					const Uint16* text,
+					SDL_Color color = __FGCOLOR) const;
+				SDL_Texture* getBlendedTexure(
+					char ch,
+					SDL_Color color = __FGCOLOR) const;
+				SDL_Texture* getBlendedTexure(
+					Uint16 ch,
+					SDL_Color color = __FGCOLOR) const;
+				#undef __FGCOLOR
+
+				int getMaxAscent() const;
+				int getMaxDescent() const;
+				int getMaxHeight() const;
+				int getLineSkip() const;
+				long getFontfaceCount() const;
+				bool isMonospaced() const;
+				char* getFontFamily() const;
+				char* getFaceStyle() const;
+
+				bool hasCharacter(Uint16 ch) const;
+				int getCharCode(Uint16 ch) const;
+
+
+				GlyphMetrics getCharMetrics(Uint16 ch) const;
+
+				int getMinX(Uint16 ch) const;
+				int getMaxX(Uint16 ch) const;
+
+				int getMinY(Uint16 ch) const;
+				int getMaxY(Uint16 ch) const;
+
+				int getAdvance(Uint16 ch) const;
+
+
+				SDL_Rect getTextSize(const std::string& text) const;
+				SDL_Rect getTextSize(const Uint16* text) const;
+				SDL_Rect getTextSize(const char* text) const;
+
+				int getTextWidth(const std::string& text) const;
+				int getTextWidth(const Uint16* text) const;
+				int getTextWidth(const char* text) const;
+
+				int getTextHeight(const std::string& text) const;
+				int getTextHeight(const Uint16* text) const;
+				int getTextHeight(const char* text) const;
+
+
+				void setData(TTF_Font* data);
+				TTF_Font* getData() const;
+
+				void setStyle(int style) const;
+				int getStyle() const;
+
+				void setBold(bool isBold = true) const;
+				bool isBold() const;
+
+				void setItalic(bool isItalic = true) const;
+				bool isItalic() const;
+
+				void setUnderlined(bool isUnderlined = true) const;
+				bool isUnderlined() const;
+
+				void setStrikethrough(bool isStrikethrough = true) const;
+				bool isStrikethrough() const;
+
+				void setOutline(int outline = 0) const;
+				int getOutline() const;
+
+				void setHinting(int hinting = TTF_HINTING_NORMAL) const;
+				int getHinting() const;
+
+				void useKerning(bool use = true) const;
+				bool usesKerning() const;
+
+			private:
+				bool ok() const;
+
+				TTF_Font* data_;
+		};
+	}
+
 	namespace image
 	{
 		class Image
@@ -47,32 +191,33 @@ namespace sly
 			public:
 				Image(const std::string& path, SDL_Rect* sourceRect = nullptr);
 				Image(const char* path, SDL_Rect* sourceRect = nullptr);
+				Image(SDL_Texture* data, SDL_Rect* sourceRect = nullptr);
 				~Image();
 
-				/*inline*/ void flip(bool flipped = true, bool vertical = false);
+				void flip(bool flipped = true, bool vertical = false);
 
-				/*inline*/ void flipHorizontaly();
-				/*inline*/ void setHorizontalFlip(bool flipped = true);
+				void flipHorizontaly();
+				void setHorizontalFlip(bool flipped = true);
 
-				/*inline*/ void flipVertically ();
-				/*inline*/ void setVerticalFlip(bool flipped = true);
+				void flipVertically ();
+				void setVerticalFlip(bool flipped = true);
 
 				void render(
 					int x = 0, int y = 0, int w = -1, int h = -1
 				) const;
 
-				/*inline*/ SDL_Rect getSourceRect() const;
-				/*inline*/ void setSourceRect(SDL_Rect src);
+				SDL_Rect getSourceRect() const;
+				void setSourceRect(SDL_Rect src);
 
-				/*inline*/ SDL_Texture* getTexture() const;
-				/*inline*/ void setTexture(SDL_Texture* texture);
+				SDL_Texture* getData() const;
+				void setData(SDL_Texture* texture);
 
-				/*inline*/ SDL_RendererFlip getFlip() const;
-				/*inline*/ void setFlip(SDL_RendererFlip flip);
-				/*inline*/ void setFlip(int flip);
+				SDL_RendererFlip getFlip() const;
+				void setFlip(SDL_RendererFlip flip);
+				void setFlip(int flip);
 
 			private:
-				/*inline*/ bool ok() const;
+				bool ok() const;
 
 				SDL_Texture* data_;
 				SDL_Rect dimensions_;
@@ -88,32 +233,34 @@ namespace sly
 				SpriteSheet(const char* path,
 					 		int w = 32, int h = 32,
 							int x = 0, int y = 0);
+				SpriteSheet(SDL_Texture* texture,
+					 		int w = 32, int h = 32,
+							int x = 0, int y = 0);
 				SpriteSheet(Image* img,
 					 		int w = 32, int h = 32,
 							int x = 0, int y = 0);
-				~SpriteSheet();
 
 				void render(int x = 0, int y = 0,
 							int spriteX = 0, int spriteY = 0,
 							int w = -1, int h = -1) const;
 
-				/*inline*/ void setData(Image* data);
-				/*inline*/ Image* getData() const;
+				void setData(Image* data);
+				Image* getData() const;
 
-				/*inline*/ void setX(int x);
-				/*inline*/ int getX() const;
+				void setX(int x);
+				int getX() const;
 
-				/*inline*/ void setY(int y);
-				/*inline*/ int getY() const;
+				void setY(int y);
+				int getY() const;
 
-				/*inline*/ void setW(int w);
-				/*inline*/ int getW() const;
+				void setW(int w);
+				int getW() const;
 
-				/*inline*/ void setH(int h);
-				/*inline*/ int getH() const;
+				void setH(int h);
+				int getH() const;
 
 			private:
-				/*inline*/ bool ok() const;
+				bool ok() const;
 
 				Image* data_;
 				int x_, y_, w_, h_;
@@ -132,6 +279,11 @@ namespace sly
 						  int length = 0,
 					 	  int w = 32, int h = 32,
 						  int x = 0, int y = 0);
+				Animation(SDL_Texture* texture,
+						  int rowLength = -1,
+						  int length = 0,
+					 	  int w = 32, int h = 32,
+						  int x = 0, int y = 0);
 				Animation(Image* img,
 						  int rowLength = -1,
 						  int length = 0,
@@ -139,7 +291,6 @@ namespace sly
 						  int x = 0, int y = 0);
 				Animation(const SpriteSheet* sheet,
 						  int rowLength = -1, int length = 0);
-				~Animation();
 
 				void render(int x = 0, int y = 0,
 							int w = -1, int h = -1) const;
@@ -158,7 +309,7 @@ namespace sly
 				int getLength() const;
 
 			private:
-				/*inline*/ bool ok() const;
+				bool ok() const;
 
 				const SpriteSheet* data_;
 				int rowLength_;
@@ -178,19 +329,19 @@ namespace sly
 
 				//
 				// Channel control
-				/*inline*/ int allocateNewChannel();
-				/*inline*/ void pauseChannel() const;
-				/*inline*/ void resumeChannel() const;
-				/*inline*/ void haltChannel() const;
-				/*inline*/ void expireChannel(int ticks = 0) const;
-				/*inline*/ void fadeOutChannel(int ms = 0) const;
-				/*inline*/ int setChannelVolume(int volume = MIX_MAX_VOLUME) const;
-				/*inline*/ bool isChannelAvailable() const;
+				int allocateNewChannel();
+				void pauseChannel() const;
+				void resumeChannel() const;
+				void haltChannel() const;
+				void expireChannel(int ticks = 0) const;
+				void fadeOutChannel(int ms = 0) const;
+				int setChannelVolume(int volume = MIX_MAX_VOLUME) const;
+				bool isChannelAvailable() const;
 
 				//
 				// Players
-				/*inline*/ int play(int loops = 0, int channel = -1) const;
-				/*inline*/ int playTimeLimited(
+				int play(int loops = 0, int channel = -1) const;
+				int playTimeLimited(
 					int ticks   = -1,
 					int loops   =  0,
 					int channel = -1
@@ -198,12 +349,12 @@ namespace sly
 
 				//
 				// Fadeins
-				/*inline*/ int fadein(
+				int fadein(
 					int ms = 0,
 					int loops = 0,
 					int channel = -1
 				) const;
-				/*inline*/ int fadeinTimeLimited(
+				int fadeinTimeLimited(
 					int ms      =  0,
 					int ticks   = -1,
 					int loops   =  0,
@@ -212,14 +363,14 @@ namespace sly
 
 				//
 				// Getters and setters
-				/*inline*/ void setChannel(int selectedChannel);
-				/*inline*/ int getChannel() const;
+				void setChannel(int selectedChannel);
+				int getChannel() const;
 
-				/*inline*/ void setData(Mix_Chunk* data);
-				/*inline*/ Mix_Chunk* getData() const;
+				void setData(Mix_Chunk* data);
+				Mix_Chunk* getData() const;
 
 			private:
-				/*inline*/ bool ok() const;
+				bool ok() const;
 
 				int selectedChannel_;
 				Mix_Chunk* data_;
@@ -232,21 +383,21 @@ namespace sly
 				Music(const char* path);
 				~Music();
 
-				/*inline*/ Mix_MusicType getType() const;
+				Mix_MusicType getType() const;
 
-				/*inline*/ void play(int loops = 0) const;
-				/*inline*/ void fadein(int ms = 0, int loops = 0) const;
-				/*inline*/ void fadeinFrom(
+				void play(int loops = 0) const;
+				void fadein(int ms = 0, int loops = 0) const;
+				void fadeinFrom(
 					double pos = 0,
 					int ms = 0,
 					int loops = 0
 				) const;
 
-				/*inline*/ void setData(Mix_Music* data);
-				/*inline*/ Mix_Music* getData() const;
+				void setData(Mix_Music* data);
+				Mix_Music* getData() const;
 
 			private:
-				/*inline*/ bool ok() const;
+				bool ok() const;
 				Mix_Music* data_;
 		};
 	}

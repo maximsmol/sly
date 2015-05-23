@@ -20,6 +20,7 @@ namespace sly
 			selectedChannel_(selectedChannel),
 			data_(Mix_LoadWAV(path))
 		{
+			assert(sly::base::inited);
 			assert(ok());
 		}
 
