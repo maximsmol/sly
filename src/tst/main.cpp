@@ -4,7 +4,7 @@
 
 #include <SDL.h>
 
-#include "SLY.hpp"
+#include "../lib/SLY.hpp"
 
 const int FPS = 30;
 constexpr double floatDelta = 0.000000000000001;
@@ -29,29 +29,29 @@ int main()
 
 	SDL_Rect rect({});
 
-	sly::image::Image img("../res/mario.png");
+	sly::image::Image img("./res/mario.png");
 	rect.x = 0;
 	rect.y = 32;
 	rect.w = 16;
 	rect.h = 16;
 	img.setSourceRect(rect);
 
-	sly::image::Image deadImg("../res/mario.png");
+	sly::image::Image deadImg("./res/mario.png");
 	rect.x = 96;
 	rect.y = 32;
 	rect.w = 16;
 	rect.h = 16;
 	deadImg.setSourceRect(rect);
 
-	sly::image::Image marioSpritesheet("../res/mario.png");
+	sly::image::Image marioSpritesheet("./res/mario.png");
 	sly::image::Animation mario(&marioSpritesheet, 6, 3, 16, 16, 16, 32);
 
 	sly::image::Animation sMario(&marioSpritesheet, 6, 3, 16, 32, 16, 0);
 	sly::image::Animation* playerSprite = &mario;
 
-	sly::sound::SoundEffect jump("../res/jump.wav", 0);
-	sly::sound::Music theme("../res/overworld.ogg");
-	sly::sound::Music died("../res/died.ogg");
+	sly::sound::SoundEffect jump("./res/jump.wav", 0);
+	sly::sound::Music theme("./res/overworld.ogg");
+	sly::sound::Music died("./res/died.ogg");
 	theme.play(-1);
 
 	double playerX = 0;
