@@ -25,6 +25,7 @@ constexpr double floorFriction = walkingSpeed/(floorSlipperiness+1);
 
 int main()
 {
+	puts("Loading: SLY Test application");
 	sly::base::init("SLY Test app", 800, 600);
 
 	SDL_Rect rect({});
