@@ -2,6 +2,8 @@ SLY is a toolkit for creating graphical applications using the [Simple Directmed
 
 ## Status
 
+[![Video](vid.png)](https://youtu.be/RbtVQjAB4jU)
+
 ![Screenshot](screenshot.png)
 
 The screenshot shows the SLY demo application running. It is much more impressive [in motion](https://youtu.be/RbtVQjAB4jU).
