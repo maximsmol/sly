@@ -5,6 +5,8 @@ import Development.Shake.Util
 
 import Data.List
 import System.Directory
+import System.Environment
+import Data.Maybe(fromMaybe)
 import Control.Monad
 import System.IO
 import Control.Monad.State
@@ -46,6 +48,9 @@ main = shakeArgs shakeOptions' $ do
   let path_tstout = path_out</>"tst"
   let path_tstdep = path_dep</>"tst"
 
+  nixCFlags <- liftIO $ ((fromMaybe "") <$> lookupEnv "NIX_CFLAGS_COMPILE")
+  nixLdFlags <- liftIO $ ((fromMaybe "") <$> lookupEnv "NIX_LDFLAGS")
+
   liftIO $ createDirectoryIfMissing True (path_out</>"rep")
 
   let exec = "dst"</>"dbg"</>"exec"
@@ -65,7 +70,7 @@ main = shakeArgs shakeOptions' $ do
           ]
     need srcs
 
-    let libFlags = ("-l"++) <$> ["sdl2", "sdl2_image", "sdl2_ttf", "sdl2_mixer"]
+    let libFlags = (("-l"++) <$> ["sdl2", "sdl2_image", "sdl2_ttf", "sdl2_mixer"]) ++ (words nixLdFlags)
 
     () <- cmd "clang++" "-shared" "-install_name" "@rpath/libsly.dylib" "-O0" "-o" [out] libFlags "-L/usr/local/opt/llvm/lib" srcs
     return ()
@@ -77,7 +82,7 @@ main = shakeArgs shakeOptions' $ do
     need srcs
     need [dynamic_lib]
 
-    let libFlags = ("-l"++) <$> ["sdl2", "sly", "sdl2_image", "sdl2_ttf", "sdl2_mixer"]
+    let libFlags = (("-l"++) <$> ["sdl2", "sly", "sdl2_image", "sdl2_ttf", "sdl2_mixer"]) ++ (words nixLdFlags)
 
     () <- cmd "clang++" "-rpath" "@executable_path" "-O0" "-o" [out] libFlags ("-L"++takeDirectory dynamic_lib) "-L/usr/local/opt/llvm/lib" srcs
     return ()
@@ -90,7 +95,7 @@ main = shakeArgs shakeOptions' $ do
     let outputFlags = ["-o", out]
     let includeFlags = ("-isystem"++) <$> ["/usr/local/include/SDL2", "/usr/local/opt/llvm/include"]
     let otherFlags = ["-std=c++1z"]
-    let command = ["clang++", "-O0"] ++ diagFlags ++ warnFlags ++ outputFlags ++ includeFlags ++ otherFlags
+    let command = ["clang++", "-O0"] ++ diagFlags ++ warnFlags ++ outputFlags ++ includeFlags ++ otherFlags ++ (words nixCFlags)
 
     () <- cmd command "-M" "-MF" [dep] [src]
     needMakefileDependencies dep
@@ -106,7 +111,7 @@ main = shakeArgs shakeOptions' $ do
     let outputFlags = ["-o", out]
     let includeFlags = ("-isystem"++) <$> ["/usr/local/include/SDL2", "/usr/local/opt/llvm/include"]
     let otherFlags = ["-std=c++1z"]
-    let command = ["clang++", "-O0"] ++ diagFlags ++ warnFlags ++ outputFlags ++ includeFlags ++ otherFlags
+    let command = ["clang++", "-O0"] ++ diagFlags ++ warnFlags ++ outputFlags ++ includeFlags ++ otherFlags ++ (words nixCFlags)
 
     () <- cmd command "-M" "-MF" [dep] [src]
     needMakefileDependencies dep

@@ -14,7 +14,7 @@ namespace sly
 		void setByteOrderSwapped(bool swapped/* = true*/)
 		{
 			assert(sly::base::inited);
-			TTF_ByteSwappedUNICODE(swapped);
+			TTF_ByteSwappedUNICODE(swapped ? SDL_TRUE : SDL_FALSE);
 		}
 
 		Font::Font(const std::string& path, int size/* = 16*/,
