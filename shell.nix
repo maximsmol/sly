@@ -10,6 +10,7 @@ pkgs.mkShell {
     (haskellPackages.ghcWithPackages
       (ps: [ ps.shake ]))
     pkg-config
+    haskell-language-server
   ];
   shellHook = ''
     NIX_CFLAGS_COMPILE="$(pkg-config --cflags sdl2) $NIX_CFLAGS_COMPILE"
